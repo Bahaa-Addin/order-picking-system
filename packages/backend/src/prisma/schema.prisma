@@ -1,0 +1,66 @@
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+ generator client {
+  provider = "prisma-client-js"
+}
+
+ enum OrderStatus {
+  PENDING
+  PICKING
+  READY_FOR_DELIVERY
+}
+ model Order {
+  id                String      @id @default(auto()) @map("_id") @db.ObjectId
+  customerName     String
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  status            OrderStatus
+  itemsDetails      ItemDetails[]
+  assigned_picker   Picker?     @relation(name: "AssignedPicker", fields: [assigned_picker_id], references: [id])
+  assigned_picker_id String?    @unique @db.ObjectId
+  cart              Cart?       @relation(name: "OrderCart", fields: [cart_id], references: [id])
+  cart_id           String?     @unique @db.ObjectId
+}
+
+ enum CartStatus {
+  MISSING_ITEMS
+  COMPLETE
+}
+ model Cart {
+  id             String         @id @default(auto()) @map("_id") @db.ObjectId
+  itemsDetails   ItemDetails[]
+  order          Order?         @relation(name: "OrderCart")
+  order_id       String?        @unique @db.ObjectId
+  status         CartStatus?
+}
+
+ enum ItemStatus {
+  IN_STOCK
+  OUT_OF_STOCK
+  PREPARING
+}
+ model Item {
+  id        String        @id @default(auto()) @map("_id") @db.ObjectId
+  name      String
+  price     Float
+  quantity  Int
+  status    ItemStatus
+}
+type ItemDetails {
+  itemId    String        @map("_id") @db.ObjectId
+  name      String
+  quantity  Int
+}
+
+ enum PickerLevel {
+  FIRST_LINE
+  SECOND_LINE
+}
+ model Picker {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  level             PickerLevel
+  assigned_orders   Order[]   @relation(name: "AssignedPicker")
+}
