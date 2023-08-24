@@ -1,4 +1,5 @@
 import { PrismaClient, Cart, CartStatus } from '@prisma/client';
+import ItemController from './ItemController';
 
 const CartsController  = {
   async getAllCarts(): Promise<Cart[]> {
@@ -45,12 +46,35 @@ const CartsController  = {
   },
   async changeCartStatusToMissingItems(cartId: string) {
     const prisma = new PrismaClient();
+    // patch the cart status to MISSING_ITEMS
     const updatedCart = prisma.cart.update({
       where: {
         id: cartId,
       },
       data: {
         status: CartStatus.MISSING_ITEMS
+      }
+    })
+    return updatedCart;
+  },
+  async addItemToCart(cartId: string, itemId: string, quantity: number) {
+    const prisma = new PrismaClient();
+    // // console.log('cartId', cartId, 'itemId', itemId, 'quantity', quantity);
+    const { name, status } = (await ItemController.getItemById(itemId))!;
+    // console.log('name', name, 'status', status);
+    const updatedCart = prisma.cart.update({
+      where: {
+        id: cartId,
+      },
+      data: {
+        itemsDetails: {
+          push: {
+            item_id: itemId,
+            name,
+            quantity,
+            status
+          }
+        }
       }
     });
     return updatedCart;

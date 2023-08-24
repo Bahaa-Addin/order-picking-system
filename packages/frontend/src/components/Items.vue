@@ -1,97 +1,194 @@
 <template>
-  <v-card
-    :loading="loading"
-    class="mx-auto my-12"
-    max-width="374"
+  <v-layout v-if="activeOrderId">
+      <v-card
+        class="mx-auto my-10"
+        min-width="450"
+      >
+        <v-list
+          v-if="orderItemsList.length"
+          :items="orderItemsList"
+          item-props
+          lines="three"
+        >
+          <template v-slot:append="{ item }">
+            <v-btn
+              :key="item.key"
+              icon
+              small
+              class="ml-2"
+              @click="addToCart(item)"
+              :disabled="item.disabled"
+            >
+              <v-icon>{{ item.appendIcon }}</v-icon>
+            </v-btn>
+          </template>
+        </v-list>
+      </v-card>
+  </v-layout>
+
+  <v-layout
+    align-center
+    justify-center
+    row
   >
-    <template v-slot:loader="{ isActive }">
-      <v-progress-linear
-        :active="isActive"
-        color="deep-purple"
-        height="4"
-        indeterminate
-      ></v-progress-linear>
-    </template>
+    <v-card
+      v-for="item in items"
+      :key="item.id"
+      class="ma-3"
+      width="374"
+    >
+      <template v-slot:loader="{ isActive }">
+        <v-progress-linear
+          :active="isActive"
+          color="deep-purple"
+          height="4"
+          indeterminate
+        ></v-progress-linear>
+      </template>
 
-    <v-img
-      cover
-      height="250"
-      src="https://cdn.vuetifyjs.com/images/cards/cooking.png"
-    ></v-img>
+      <v-img
+        cover
+        height="250"
+        :src="item.image"
+      ></v-img>
 
-    <v-card-item>
-      <v-card-title>Cafe Badilico</v-card-title>
+      <v-card-item>
+        <v-card-title>{{item.name}}</v-card-title>
 
-      <v-card-subtitle>
-        <span class="me-1">Local Favorite</span>
+        <v-card-subtitle>
+          <span class="me-1">{{item.status.split('_').join(' ')}}</span>
+        </v-card-subtitle>
+      </v-card-item>
 
-        <v-icon
-          color="error"
-          icon="mdi-fire-circle"
-          size="small"
-        ></v-icon>
-      </v-card-subtitle>
-    </v-card-item>
-
-    <v-card-text>
-      <v-row
-        align="center"
-        class="mx-0"
-      >
-        <v-rating
-          :model-value="4.5"
-          color="amber"
-          density="compact"
-          half-increments
-          readonly
-          size="small"
-        ></v-rating>
-
-        <div class="text-grey ms-4">
-          4.5 (413)
+      <v-card-text>
+        <div class="text-grey">
+          {{item.quantity}} Available
         </div>
-      </v-row>
 
-      <div class="my-4 text-subtitle-1">
-        $ • Italian, Cafe
-      </div>
-
-      <div>Small plates, salads & sandwiches - an intimate setting with 12 indoor seats plus patio seating.</div>
-    </v-card-text>
-
-    <v-divider class="mx-4 mb-1"></v-divider>
-
-    <v-card-title>Tonight's availability</v-card-title>
-
-    <div class="px-4">
-      <v-chip-group v-model="selection">
-        <v-chip>5:30PM</v-chip>
-
-        <v-chip>7:30PM</v-chip>
-
-        <v-chip>8:00PM</v-chip>
-
-        <v-chip>9:00PM</v-chip>
-      </v-chip-group>
-    </div>
-
-    <v-card-actions>
-      <v-btn
-        color="deep-purple-lighten-2"
-        variant="text"
-        @click="reserve"
-      >
-        Reserve
-      </v-btn>
-    </v-card-actions>
-  </v-card>
+        <div class="my-4 text-subtitle-1">
+          $ {{item.price}}
+        </div>
+      </v-card-text>
+    </v-card>
+  </v-layout>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue'
+import { defineComponent, onMounted, ref, watch } from 'vue'
+import { subscribeToItems } from '@/services/items';
+import { IItem } from '../../../../types';
+
+const ITEMS_IMAGES = {
+  Bread: 'https://www.goldmedalbakery.com/content/uploads/2019/12/Sandwich-White.jpg',
+  Eggs: 'https://www.eggcartons.com/cdn/shop/products/FHP-56T-1-YELLOW-TOPWEGGS_2048x2048.jpg?v=1661178954',
+  Milk: 'https://res.cloudinary.com/farm-boy/image/upload/c_fill,g_center,h_600,w_600,f_auto/Products/23558_Reg.png',
+}
 
 export default defineComponent({
-  name: "Items"
+  name: 'Items',
+  data() {
+    return {
+      items: [],
+      activeOrderId: '',
+      order: undefined,
+      orderItemsList: [],
+    }
+  },
+  methods: {
+    setListItems() {
+      if (this.order && this.items.length) {
+        this.orderItemsList =  this.order.itemsDetails.flatMap((orderItemDetails, idx, arr) => {
+          const item = this.items.find((item) => item.id === orderItemDetails.item_id);
+          const listItem = [
+            {
+              key: orderItemDetails.item_id,
+              prependAvatar: ITEMS_IMAGES[orderItemDetails.name],
+              title: orderItemDetails.name,
+              subtitle: `Qty: ${orderItemDetails.quantity}`,
+              appendIcon: 'mdi-cart-plus',
+              id: orderItemDetails.item_id,
+              quantity: orderItemDetails.quantity,
+              disabled: orderItemDetails.quantity > item.quantity
+            }
+          ];
+          if (idx !== arr.length - 1) {
+            listItem.push({ type: 'divider', inset: true });
+          }
+
+          return listItem;
+        });
+
+        this.orderItemsList.unshift({ type: 'subheader', title: 'Order' });
+        return this.orderItemsList;
+      } else {
+        return [];
+      }
+    },
+    addToCart(orderItemDetails) {
+      const item = this.items.find((item) => item.id === orderItemDetails.id);
+      if (orderItemDetails.quantity > item.quantity) {
+        return;
+      }
+
+      const foundItemIdx = this.orderItemsList.findIndex((orderItm) => orderItm.id === item.id)
+      this.orderItemsList[foundItemIdx].appendIcon = 'mdi-cart-check';
+      this.orderItemsList[foundItemIdx].disabled = true;
+
+
+      const cartId = this.order.cart_id;
+      fetch(`http://localhost:3000/api/v1/carts/${cartId}/addItem`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          itemId: orderItemDetails.id, quantity: orderItemDetails.quantity
+        })
+      })
+        .then(response => response.json())
+        // console.log('orderItemQuantity: ', orderItemQuantity);
+        .then(json => console.log('add to cart response: ', json))
+    }
+  },
+  async mounted() {
+    const itemsData = await fetch(`http://localhost:3000/api/v1/items`)
+      .then((res) => res.json())
+      .then(json => {
+        console.log('items: ', json);
+        return json
+      })
+      .then((data) => data.items.map((item: IItem) => ({ ...item, image: ITEMS_IMAGES[item.name] })))
+    this.items = itemsData;
+
+    this.activeOrderId = this.$router.currentRoute.value.params.activeOrderId;
+    console.log('this.activeOrderId: ', this.activeOrderId);
+    if (!this.activeOrderId) {
+      return;
+    }
+
+
+    const activeOrder = await fetch(`http://localhost:3000/api/v1/orders/${this.activeOrderId}`)
+      .then(response => response.json())
+      .then(json => {
+        console.log('order: ', json.order);
+        return json
+      })
+      .then(json => json.order)
+    this.order = activeOrder;
+
+    console.log('this.order.id ', this.order.id);
+    console.log('this.order.cart_id: ', this.order.cart_id);
+
+    this.setListItems();
+
+    subscribeToItems((change) => {
+      console.log('items change', change);
+      const updatedItem = change.fullDocument;
+      updatedItem.image = ITEMS_IMAGES[updatedItem.name];
+      const itemIndex = this.items.findIndex((item) => item.id === updatedItem._id.toString());
+      this.items[itemIndex].quantity = updatedItem.quantity;
+    })
+  }
 })
 </script>
 

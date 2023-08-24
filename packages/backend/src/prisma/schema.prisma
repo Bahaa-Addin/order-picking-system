@@ -1,6 +1,7 @@
 datasource db {
   provider = "mongodb"
-  url      = env("DATABASE_URL")
+//  url      = env("DATABASE_URL")
+    url = "mongodb+srv://bahaa:BemvBNixFGkp0OVs@seoudi.pcbwpox.mongodb.net/test?retryWrites=true&w=majority"
 }
 
  generator client {
@@ -50,8 +51,9 @@ datasource db {
   status    ItemStatus
 }
 type ItemDetails {
-  itemId    String        @map("_id") @db.ObjectId
+  item_id    String        @map("_id") @db.ObjectId
   name      String
+  status    ItemStatus
   quantity  Int
 }
 

@@ -14,13 +14,11 @@
 
     <v-spacer></v-spacer>
 
-    CART
-    <v-btn icon>
-      <v-icon>mdi-cart</v-icon>
-    </v-btn>
+
+    <Cart v-if="activeOrderId" :activeOrderId="activeOrderId" />
     <v-menu>
       <template v-slot:activator="{ props }" class="mx-10">
-        {{ pickerLevel }}
+        {{ routeName }}
         <v-btn icon="mdi-run" v-bind="props"></v-btn>
       </template>
 
@@ -42,9 +40,10 @@
 
 <script lang="ts" setup>
   // fetch all pickers from the backend
-  import { computed, ref } from 'vue'
+  import { computed, ref, watch } from 'vue'
   import { IPicker } from '../../../../../types';
   import { useRoute } from 'vue-router';
+  import Cart from '@/components/Cart.vue'
 
   const route = useRoute()
   const pickers: IPicker[] = ref([])
@@ -53,9 +52,14 @@
     .then(response => response.json())
     .then(json => (pickers.value = json.pickers))
 
-
-  const pickerLevel = computed(() => {
+  const routeName = computed(() => {
     return route.name;
+  })
+
+  const activeOrderId = computed(() => {
+    return route.name === 'PICK_ITEMS'
+    ? route.params.activeOrderId
+    : '';
   })
 
 </script>

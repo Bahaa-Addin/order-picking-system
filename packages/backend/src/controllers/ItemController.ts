@@ -5,6 +5,14 @@ const ItemsController = {
     const prisma = new PrismaClient();
     return prisma.item.findMany();
   },
+  async getItemById(itemId: string) {
+    const prisma = new PrismaClient();
+    return prisma.item.findUnique({
+      where: {
+        id: itemId
+      }
+    });
+  },
   async updateItem(itemId: string, itemDetails: ItemDetails) {
     const prisma = new PrismaClient();
 

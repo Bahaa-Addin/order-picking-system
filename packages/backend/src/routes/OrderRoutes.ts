@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import OrdersController from '../controllers/OrderController';
 import HttpStatusCodes from '../constants/HttpStatusCodes';
+import CartsController from '../controllers/CartController';
 
 const orderRouter = Router();
 
@@ -32,6 +33,9 @@ orderRouter.post('/:orderId/pick', async (req, res) => {
 orderRouter.post('/:orderId/delegate', async (req, res) => {
   const { orderId } = req.params;
   const order = await OrdersController.assignOrderToSecondLinePicker(orderId);
+  if (order.cart_id) {
+    await CartsController.changeCartStatusToMissingItems(order.cart_id);
+  }
   return res.status(HttpStatusCodes.OK).json({ order });
 });
 

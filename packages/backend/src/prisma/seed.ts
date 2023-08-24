@@ -36,8 +36,8 @@ const ITEMS = {
     id: breadItemId.toString(),
     name: 'Bread',
     price: 4.99,
-    quantity: 20,
-    status: ItemStatus.IN_STOCK,
+    quantity: 0,
+    status: ItemStatus.PREPARING,
   }
 
 }
@@ -77,19 +77,22 @@ const ordersData: Prisma.OrderCreateInput[] = [
     status: OrderStatus.PENDING,
     itemsDetails: [
       {
-        itemId: milkItemId.toString(),
+        item_id: milkItemId.toString(),
         name: ITEMS[milkItemId.toString()].name,
-        quantity: 4
+        quantity: 4,
+        status: ItemStatus.IN_STOCK,
       },
       {
-        itemId: eggsItemId.toString(),
+        item_id: eggsItemId.toString(),
         name: ITEMS[eggsItemId.toString()].name,
-        quantity: 10
+        quantity: 10,
+        status: ItemStatus.IN_STOCK,
       },
       {
-        itemId: breadItemId.toString(),
+        item_id: breadItemId.toString(),
         name: ITEMS[breadItemId.toString()].name,
-        quantity: 25
+        quantity: 25,
+        status: ItemStatus.IN_STOCK,
       }
     ]
   }
@@ -100,12 +103,12 @@ const ordersData: Prisma.OrderCreateInput[] = [
 //     order_id: ordersData[0].id,
 //     itemsDetails: [
 //     //   {
-//     //   itemId: milkItemId.toString(),
+//     //   item_id: milkItemId.toString(),
 //     //   name: ITEMS[milkItemId.toString()].name,
 //     //   quantity: 4
 //     // },
 //     // {
-//     //   itemId: breadItemId.toString(),
+//     //   item_id: breadItemId.toString(),
 //     //   name: ITEMS[breadItemId.toString()].name,
 //     //   quantity: 10
 //     // }

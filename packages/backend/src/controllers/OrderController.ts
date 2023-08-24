@@ -1,5 +1,6 @@
 import { PrismaClient, Order, PickerLevel } from '@prisma/client';
 import PickersController from './PickerController';
+import CartsController from './CartController';
 
 
 const OrdersController = {
@@ -26,8 +27,18 @@ const OrdersController = {
     })
   },
   async pickOrder(orderId: string) {
+    console.log('pick orderId', orderId);
     const prisma = new PrismaClient();
-    // create a cart and assign it to the order, and change the order status to OrderStatus.PICKING
+    const cart = await CartsController.getCartByOrderID(orderId);
+
+    if (cart) {
+     return prisma.order.findUnique({
+        where: {
+          id: orderId
+        }
+     });
+    }
+
     const updatedOrder = prisma.order.update({
       where: {
         id: orderId,
@@ -43,6 +54,7 @@ const OrdersController = {
         }
     });
 
+    console.log('updatedOrder', updatedOrder);
     return updatedOrder;
   },
   async assignOrderToFirstLinePicker(orderId: string) {

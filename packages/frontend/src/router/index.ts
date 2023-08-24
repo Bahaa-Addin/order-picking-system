@@ -43,7 +43,12 @@ const routes = [
         path: '',
         name: 'ITEMS',
         component: () => import(/* webpackChunkName: "home" */ '@/components/Items.vue'),
-      }
+      },
+      {
+        path: ':activeOrderId',
+        name: 'PICK_ITEMS',
+        component: () => import(/* webpackChunkName: "home" */ '@/components/Items.vue'),
+      },
     ]
   }
 ]

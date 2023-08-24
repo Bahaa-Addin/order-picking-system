@@ -7,6 +7,7 @@
       max-width="344"
       variant="outlined"
       prepend-icon="mdi-basket"
+      :loading="loading"
     >
       <v-card-item>
         <div>
@@ -33,7 +34,7 @@
     </v-card>
 
   <v-card
-    v-else
+    v-else-if="loading"
     class="mx-auto ma-10"
     max-width="344"
     variant="outlined"
@@ -51,12 +52,16 @@ import { IOrder } from '../../../../types';
 
 export default defineComponent({
   name: 'Orders',
+  data() {
+    return {
+      loading: true,
+    }
+  },
   setup() {
     // console.log('$route.params.id', this.$route.params.id);
     const route = useRoute()
     const pickerId = ref('')
     const orders: IOrder[] = ref([])
-    const loading = ref(true);
 
     const pickerLevel = computed(() => {
       return route.name;
@@ -66,9 +71,11 @@ export default defineComponent({
       // fetch picker by level from backend
       console.log('pickerLevel: ', pickerLevel.value)
       orders.value = [];
-      await fetch(`http://localhost:3000/api/v1/pickers/level/${pickerLevel.value}`)
-        .then(response => response.json())
-        .then(json => (pickerId.value = json.picker.id))
+      if (pickerLevel.value === 'FIRST_LINE' || pickerLevel.value === 'SECOND_LINE') {
+        await fetch(`http://localhost:3000/api/v1/pickers/level/${pickerLevel.value}`)
+          .then(response => response.json())
+          .then(json => (pickerId.value = json.picker.id))
+      }
     }, { immediate: true });
 
     watch(pickerId, async () => {
@@ -84,8 +91,9 @@ export default defineComponent({
   },
   methods: {
     formatDate,
-    pickOrder(order: IOrder) {
-      // make a post request to the backend
+     pickOrder(order: IOrder) {
+      this.loading = true;
+
       const { id: orderId } = order
       fetch(`http://localhost:3000/api/v1/orders/${orderId}/pick`, {
         method: 'POST',
@@ -97,10 +105,16 @@ export default defineComponent({
         .then(response => response.json())
         .then(json => {
           console.log('json: ', json)
+          this.loading = true;
+          return json.order;
+        })
+        .then((order: IOrder) => {
+          this.$router.push(`/items/${order.id}`);
         })
     },
     delegateOrder(order: IOrder) {
       // make a post request to the backend
+      this.orders = this.orders.filter((ord) => ord.id !== order.id);
       const { id: orderId } = order
       fetch(`http://localhost:3000/api/v1/orders/${orderId}/delegate`, {
         method: 'POST',
@@ -115,5 +129,14 @@ export default defineComponent({
         })
     },
   },
+  watch: {
+    orders: {
+      handler() {
+        this.loading = this.orders.length
+        ? false
+        : true
+      },
+    }
+  }
 })
 </script>
