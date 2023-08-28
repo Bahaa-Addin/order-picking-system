@@ -77,6 +77,7 @@
 import { defineComponent, onMounted, ref, watch } from 'vue'
 import { subscribeToItems } from '@/services/items';
 import { IItem } from '../../../../types';
+import { API_BASE_URL } from '../constants';
 
 const ITEMS_IMAGES = {
   Bread: 'https://www.goldmedalbakery.com/content/uploads/2019/12/Sandwich-White.jpg',
@@ -136,7 +137,7 @@ export default defineComponent({
 
 
       const cartId = this.order.cart_id;
-      fetch(`http://localhost:3000/api/v1/carts/${cartId}/addItem`, {
+      fetch(`${API_BASE_URL}/carts/${cartId}/addItem`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -151,7 +152,7 @@ export default defineComponent({
     }
   },
   async mounted() {
-    const itemsData = await fetch(`http://localhost:3000/api/v1/items`)
+    const itemsData = await fetch(`${API_BASE_URL}/items`)
       .then((res) => res.json())
       .then(json => {
         console.log('items: ', json);
@@ -167,7 +168,7 @@ export default defineComponent({
     }
 
 
-    const activeOrder = await fetch(`http://localhost:3000/api/v1/orders/${this.activeOrderId}`)
+    const activeOrder = await fetch(`${API_BASE_URL}/orders/${this.activeOrderId}`)
       .then(response => response.json())
       .then(json => {
         console.log('order: ', json.order);

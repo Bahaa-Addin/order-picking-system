@@ -28,6 +28,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue'
 import { subscribeToCart } from '@/services/cart';
+import { API_BASE_URL } from '../constants';
 
 const ITEMS_IMAGES = {
   Bread: 'https://www.goldmedalbakery.com/content/uploads/2019/12/Sandwich-White.jpg',
@@ -54,7 +55,7 @@ export default defineComponent({
     if(!this.activeOrderId) {
       return;
     } else {
-       fetch(`http://localhost:3000/api/v1/carts/order/${this.activeOrderId}`)
+       fetch(`${API_BASE_URL}/carts/order/${this.activeOrderId}`)
         .then(response => response.json())
         // log and return the cart items
         .then(json => {this.cart = json.cart; this.cartItems = json.cart.itemsDetails; })

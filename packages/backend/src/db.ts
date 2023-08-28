@@ -1,8 +1,9 @@
 import { MongoClient, Db } from 'mongodb';
+import EnvVars from './constants/EnvVars';
 
-// const uri = process.env.DATABASE_URL;
-// console.log('mongodb uri', uri)
-const uri = "mongodb+srv://bahaa:BemvBNixFGkp0OVs@seoudi.pcbwpox.mongodb.net/test?retryWrites=true&w=majority"
+const uri = EnvVars.DatabaseUrl;
+console.log('mongodb uri', uri)
+
 
 export const client = new MongoClient(uri);
 

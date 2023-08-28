@@ -49,6 +49,7 @@ import { defineComponent, ref, watch, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { formatDate } from "@vueuse/core";
 import { IOrder } from '../../../../types';
+import { API_BASE_URL } from '../constants';
 
 export default defineComponent({
   name: 'Orders',
@@ -72,7 +73,7 @@ export default defineComponent({
       console.log('pickerLevel: ', pickerLevel.value)
       orders.value = [];
       if (pickerLevel.value === 'FIRST_LINE' || pickerLevel.value === 'SECOND_LINE') {
-        await fetch(`http://localhost:3000/api/v1/pickers/level/${pickerLevel.value}`)
+        await fetch(`${API_BASE_URL}/pickers/level/${pickerLevel.value}`)
           .then(response => response.json())
           .then(json => (pickerId.value = json.picker.id))
       }
@@ -80,7 +81,7 @@ export default defineComponent({
 
     watch(pickerId, async () => {
       if (pickerId.value) {
-        fetch(`http://localhost:3000/api/v1/orders/picker-orders/${pickerId.value}`)
+        fetch(`${API_BASE_URL}/orders/picker-orders/${pickerId.value}`)
           .then(response => response.json())
           .then(json => { console.log('picker-orders: ', json); return json })
           .then(json => (orders.value = json.orders))
@@ -95,7 +96,7 @@ export default defineComponent({
       this.loading = true;
 
       const { id: orderId } = order
-      fetch(`http://localhost:3000/api/v1/orders/${orderId}/pick`, {
+      fetch(`${API_BASE_URL}/orders/${orderId}/pick`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +117,7 @@ export default defineComponent({
       // make a post request to the backend
       this.orders = this.orders.filter((ord) => ord.id !== order.id);
       const { id: orderId } = order
-      fetch(`http://localhost:3000/api/v1/orders/${orderId}/delegate`, {
+      fetch(`${API_BASE_URL}/orders/${orderId}/delegate`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

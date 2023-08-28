@@ -44,11 +44,12 @@
   import { IPicker } from '../../../../../types';
   import { useRoute } from 'vue-router';
   import Cart from '@/components/Cart.vue'
+  import { API_BASE_URL } from '../../constants';
 
   const route = useRoute()
   const pickers: IPicker[] = ref([])
 
-  fetch('http://localhost:3000/api/v1/pickers')
+  fetch(`${API_BASE_URL}/pickers`)
     .then(response => response.json())
     .then(json => (pickers.value = json.pickers))
 
