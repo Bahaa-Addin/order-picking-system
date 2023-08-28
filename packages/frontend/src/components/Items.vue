@@ -188,6 +188,7 @@ export default defineComponent({
       updatedItem.image = ITEMS_IMAGES[updatedItem.name];
       const itemIndex = this.items.findIndex((item) => item.id === updatedItem._id.toString());
       this.items[itemIndex].quantity = updatedItem.quantity;
+      this.items[itemIndex].status = updatedItem.status;
     })
   }
 })

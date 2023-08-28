@@ -36,8 +36,8 @@ const ITEMS = {
     id: breadItemId.toString(),
     name: 'Bread',
     price: 4.99,
-    quantity: 0,
-    status: ItemStatus.PREPARING,
+    quantity: 50,
+    status: ItemStatus.IN_STOCK,
   }
 
 }
@@ -98,23 +98,23 @@ const ordersData: Prisma.OrderCreateInput[] = [
   }
 ];
 
-// const cartItemsData: Prisma.CartCreateInput[] = [
-//   {
-//     order_id: ordersData[0].id,
-//     itemsDetails: [
-//     //   {
-//     //   item_id: milkItemId.toString(),
-//     //   name: ITEMS[milkItemId.toString()].name,
-//     //   quantity: 4
-//     // },
-//     // {
-//     //   item_id: breadItemId.toString(),
-//     //   name: ITEMS[breadItemId.toString()].name,
-//     //   quantity: 10
-//     // }
-//     ]
-//   }
-// ]
+const cartItemsData: Prisma.CartCreateInput[] = [
+  {
+    order_id: ordersData[0].id,
+    itemsDetails: [
+    //   {
+    //   item_id: milkItemId.toString(),
+    //   name: ITEMS[milkItemId.toString()].name,
+    //   quantity: 4
+    // },
+    // {
+    //   item_id: breadItemId.toString(),
+    //   name: ITEMS[breadItemId.toString()].name,
+    //   quantity: 10
+    // }
+    ]
+  }
+]
 
 // console.log(`Prisma`, prisma);
 console.log(`Pickers`, pickersData);
@@ -162,23 +162,23 @@ async function main() {
   ));
   console.log(`Created orders length:`, createdOrders.length);
 
-  // const createdCartItems = await Promise.all(
-  //   cartItemsData.map(async cartItemData => {
-  //     const createdCart = await prisma.cart.create({
-  //       data: {
-  //         ...cartItemData,
-  //         order: {
-  //           connect: {
-  //             id: createdOrders[0].id
-  //           }
-  //         }
-  //       },
-  //     })
-  //     console.log(`Created cart item with id: ${createdCart.id}`)
-  //     return createdCart as Cart;
-  //   })
-  // );
-  // console.log(`Created cart items length:`, createdCartItems.length);
+  const createdCartItems = await Promise.all(
+    cartItemsData.map(async cartItemData => {
+      const createdCart = await prisma.cart.create({
+        data: {
+          ...cartItemData,
+          order: {
+            connect: {
+              id: createdOrders[0].id
+            }
+          }
+        },
+      })
+      console.log(`Created cart item with id: ${createdCart.id}`)
+      return createdCart as Cart;
+    })
+  );
+  console.log(`Created cart items length:`, createdCartItems.length);
 
   console.log(`Seeding finished.`)
 }
