@@ -1,7 +1,7 @@
 datasource db {
   provider = "mongodb"
-//  url      = env("DATABASE_URL")
-    url = "mongodb+srv://bahaa:BemvBNixFGkp0OVs@seoudi.pcbwpox.mongodb.net/test?retryWrites=true&w=majority"
+  url      = env("DATABASE_URL")
+//    url = "mongodb+srv://bahaa:BemvBNixFGkp0OVs@seoudi.pcbwpox.mongodb.net/test?retryWrites=true&w=majority"
 }
 
  generator client {
